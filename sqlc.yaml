@@ -1,0 +1,12 @@
+version: "2"
+sql:
+- schema: "db/migration/"
+  queries: "db/query/"
+  engine: "postgresql"
+  gen:
+    go: 
+      package: "db"
+      out: "db/sqlc"
+      emit_json_tags: true # untuk memiliki tag json struct model db
+      emit_interface: true # untuk memperlihatkan antarmuka query
+      emit_empty_slices: true # slice yang dikembalikan oleh query harus "empty", buka nill
