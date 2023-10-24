@@ -61,9 +61,11 @@ jobs:
 
       # Install Go Migrate
     - name: Install Golang migrate
+      # Lakukan Instalasi GO Migrate
+      # Pindahkan migrate ke /user/bin/{ganti nama menjadi migrate karena harus disesuaikan dengan migrate}
       run: | 
         curl -L https://github.com/golang-migrate/migrate/releases/download/v4.16.2/migrate.linux-amd64.tar.gz | tar xvz
-        sudo mv migrate /usr/bin/
+        sudo mv migrate /usr/bin/migrate
         which migrate
 
       # Lakukan migrasi DB
