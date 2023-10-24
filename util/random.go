@@ -3,15 +3,15 @@ package util
 import (
 	"math/rand"
 	"strings"
-	"time"
 )
 
 // Dipanggil secara langsung ketika package dipanggil pertama kali karena ada init()
-func init(){
-	// Penerepan nilai seed
-	// Menggunakan parameter int64 dan unixNano
-	rand.Seed(time.Now().UnixNano())
-}
+// Go akan secara otomatis memberikan angka acak
+// func init(){
+// Penerepan nilai seed
+// Menggunakan parameter int64 dan unixNano
+// 	rand.NewSource(time.Now().UnixNano())
+// }
 
 // Fungsi menghasilkan bilangan bulat acak antara min dan max
 func RandomInt(min, max int64) int64 {

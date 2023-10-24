@@ -1,0 +1,5 @@
+linters-settings:
+  disable-all: true
+  enable:
+    - govet
+    - golint
