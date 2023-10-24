@@ -1,7 +1,0 @@
--   repo: local
-    hooks:
-    -   id: golangci-lint
-        name: golangci-lint
-        language: go
-        entry: golangci-lint
-        stages: [commit]
