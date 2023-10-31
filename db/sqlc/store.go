@@ -6,6 +6,12 @@ import (
 	"fmt"
 )
 
+// Digunakan untuk menggunakan DB tiruan
+type MockStore interface {
+	Querier
+	TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error)
+}
+
 // Store menyediakan semua fungsi untuk menjalankan kueri database satu per satu, serta kombinasi dalam 1 transaksi
 // Single query berasal dari SQLC
 type Store struct {
@@ -18,7 +24,8 @@ type Store struct {
 	db *sql.DB 
 }
 
-func NewStore(db *sql.DB) *Store {
+// karena mockstore itu interface, maka return nya bisa apa saja
+func NewStore(db *sql.DB) MockStore {
 	return &Store{
 		db: db, // mengembalikan objek miliki Store
 		Queries: New(db), // mengembalikan objek query

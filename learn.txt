@@ -117,3 +117,10 @@ mengunci baris atau tabel dalam urutan yang berbeda dan saling menunggu satu sam
 	   transaksi lain yang sedang berlangsung secara bersamaan.
 
 	4)
+
+	================================================================================================
+
+	Mockgen
+
+	Mockgen digunakan untuk membuat sebuah tiruan dari fungsi dengan menggunakan bantuan interface
+	

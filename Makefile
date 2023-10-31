@@ -28,4 +28,10 @@ gotidy:
 gotest:
 	go test -v -cover ./...
 
-.PHONY: postgres createdb dropdb migrateup migratedown startdb stopdb sqlcgen gotidy gotest
+server:
+	go run main.go
+
+mockgen:
+	mockgen -package mockdb -destination db/mock/store.go github.com/hafiihzafarhana/Go-GRPC-Simple-Bank/db/sqlc MockStore
+
+.PHONY: postgres createdb dropdb migrateup migratedown startdb stopdb sqlcgen gotidy gotest server mockgen

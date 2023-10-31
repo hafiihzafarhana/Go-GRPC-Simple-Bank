@@ -6,12 +6,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/hafiihzafarhana/Go-GRPC-Simple-Bank/util"
 	_ "github.com/lib/pq" // Diberi "_" agar tidak hilang pada oleh formatter
-)
-
-const (
-	dbDriver = "postgres"
-	dbSource = "postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable"
 )
 
 // deklarasi untuk menyimpan kesleuruh method yang ada di Queries
@@ -21,10 +17,15 @@ var testQueries *Queries
 var testDB *sql.DB
 
 func TestMain(m *testing.M){
-	var err error
+	// Ambil fungsi load config dalam util
+	config, err := util.LoadConfig("../../")
+
+	if err != nil {
+		log.Fatal("Can't connect configuration", err)
+	}
 
 	// Membuka DB
-	testDB, err = sql.Open(dbDriver, dbSource)
+	testDB, err = sql.Open(config.DBDriver, config.DBSource)
 	
 	// Lakukan pengecheckan apabila ada error
 	if err != nil {
