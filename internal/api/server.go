@@ -41,6 +41,10 @@ func NewServer(store db.MockStore) *Server {
 	// tambah data transfer
 	router.POST("/transfers", server.createTransfer)
 
+	// User
+	// tambah data user
+	router.POST("/users", server.createUser)
+
 	// tambah route ke router
 	server.router = router
 	return server

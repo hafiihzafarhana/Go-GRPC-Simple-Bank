@@ -10,12 +10,21 @@ import (
 )
 
 func createRandomUser(t *testing.T) User {
+	// Random user
+	hashedPassword, err := util.HashPassword(util.RandomString(6))
+
+	// Apabila gagal mengembalikan err
+	require.NoError(t, err)
+
+	// Tidak boleh kosong
+	require.NotEmpty(t, hashedPassword)
+
 	// Create parameter
 	arg := CreateUserParams{
 		Username: util.RandomOwner(),
 		FullName: util.RandomOwner(),
 		Email: util.RandomEmail(),
-		Password: "secret",
+		Password: hashedPassword,
 	}
 
 	// Eksekusi create user sesuai parameter
