@@ -2,23 +2,18 @@ package api
 
 import (
 	"database/sql"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator"
 	db "github.com/hafiihzafarhana/Go-GRPC-Simple-Bank/db/sqlc"
+	"github.com/lib/pq"
 )
 
 // input untuk create account
 type createAccountRequest struct {
 	Owner    string `json:"owner" binding:"required"`
-	Currency string `json:"currency" binding:"required,oneof=EUR USD"`
-}
-
-var v = validator.New()
-
-func init() {
-    v.RegisterValidation("oneof", isValidCurrency)
+	Currency string `json:"currency" binding:"required,currency"`
 }
 
 // controller create account
@@ -44,6 +39,16 @@ func (server *Server) createAccount(ctx *gin.Context){
 	account, err := server.store.CreateAccount(ctx, arg)
 
 	if err != nil {
+		// Memeriksa kesalahan 403 (Forbidden)
+		if pqErr, ok := err.(*pq.Error); ok {
+			log.Println(pqErr.Code.Name())
+			switch pqErr.Code.Name() {
+			case "foreign_key_violation", "unique_violation":
+				ctx.JSON(http.StatusForbidden, errorResponse(err))
+				return
+			}
+		}
+
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
@@ -73,11 +78,13 @@ func (server *Server) getAccountById(ctx *gin.Context){
 	account, err := server.store.GetAccount(ctx, user_id)
 
 	if err != nil {
+		// jika akun tidak ada
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
 
+		// jika ada error pada server
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
@@ -118,9 +125,4 @@ func (server *Server) listAccounts(ctx *gin.Context){
 	}
 
 	ctx.JSON(http.StatusOK, account)
-}
-
-func isValidCurrency(fl validator.FieldLevel) bool {
-    currency := fl.Field().String()
-    return currency == "EUR" || currency == "USD"
 }

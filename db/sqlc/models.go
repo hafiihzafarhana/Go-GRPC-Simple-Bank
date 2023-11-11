@@ -82,3 +82,14 @@ type Transfer struct {
 	UpdatedAt sql.NullTime `json:"updated_at"`
 	DeletedAt sql.NullTime `json:"deleted_at"`
 }
+
+type User struct {
+	Username         string       `json:"username"`
+	Password         string       `json:"password"`
+	FullName         string       `json:"full_name"`
+	Email            string       `json:"email"`
+	PasswordChangeAt sql.NullTime `json:"password_change_at"`
+	CreatedAt        sql.NullTime `json:"created_at"`
+	UpdatedAt        sql.NullTime `json:"updated_at"`
+	DeletedAt        sql.NullTime `json:"deleted_at"`
+}
