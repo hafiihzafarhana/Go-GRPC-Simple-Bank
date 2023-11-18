@@ -11,14 +11,14 @@ import (
 
 // input untuk create transfer
 type transferRequest struct {
-	FromAccountId    int64 `json:"from_account_id" binding:"required,min=1"`
-	ToAccountId int64 `json:"to_account_id" binding:"required,min=1"`
-	Amount int64 `json:"amount" binding:"required,gt=0"`
-	Currency string `json:"currency" binding:"required,currency"`
+	FromAccountId int64  `json:"from_account_id" binding:"required,min=1"`
+	ToAccountId   int64  `json:"to_account_id" binding:"required,min=1"`
+	Amount        int64  `json:"amount" binding:"required,gt=0"`
+	Currency      string `json:"currency" binding:"required,currency"`
 }
 
 // controller create transfer
-func (server *Server) createTransfer(ctx *gin.Context){
+func (server *Server) createTransfer(ctx *gin.Context) {
 	// Deklarasi tipe data
 	var req transferRequest
 
@@ -37,8 +37,8 @@ func (server *Server) createTransfer(ctx *gin.Context){
 	// argumen yang akan dimasukan ke dalam db
 	arg := db.TransferTxParams{
 		FromAccountId: req.FromAccountId,
-		ToAccountId: req.ToAccountId,
-		Amount: req.Amount,
+		ToAccountId:   req.ToAccountId,
+		Amount:        req.Amount,
 	}
 
 	// Masukan data ke dalam db

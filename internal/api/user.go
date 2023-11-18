@@ -12,19 +12,19 @@ import (
 
 // input untuk create transfer
 type createUserRequest struct {
-	FullName    string `json:"full_name" binding:"required"`
+	FullName string `json:"full_name" binding:"required"`
 	Username string `json:"username" binding:"required,alphanum"`
 	Password string `json:"password" binding:"required,min=6"`
-	Email string `json:"email" binding:"required,email"`
+	Email    string `json:"email" binding:"required,email"`
 }
 
 type createUserResponse struct {
-	FullName    string `json:"full_name"`
+	FullName string `json:"full_name"`
 	Username string `json:"username"`
-	Email string `json:"email"`
+	Email    string `json:"email"`
 }
 
-func (server *Server) createUser(ctx *gin.Context){
+func (server *Server) createUser(ctx *gin.Context) {
 	// Deklarasi tipe data
 	var req createUserRequest
 
@@ -47,7 +47,7 @@ func (server *Server) createUser(ctx *gin.Context){
 		Username: req.Username,
 		FullName: req.FullName,
 		Password: hashPass,
-		Email: req.Email,
+		Email:    req.Email,
 	}
 
 	// Masukan data ke dalam db
@@ -68,9 +68,10 @@ func (server *Server) createUser(ctx *gin.Context){
 		return
 	}
 
+	// kirim response
 	ctx.JSON(http.StatusCreated, createUserResponse{
 		FullName: user.FullName,
 		Username: user.Username,
-		Email: user.Email,
+		Email:    user.Email,
 	})
 }

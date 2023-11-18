@@ -40,9 +40,9 @@ func TestJWTMaker(t *testing.T) {
 	// payload tidak empty
 	require.NotEmpty(t, payload)
 
-	// payload id bukanlah null 
+	// payload id bukanlah null
 	require.NotZero(t, payload.ID)
-	
+
 	// cocokan
 	require.Equal(t, username, payload.Username)
 	require.WithinDuration(t, expiredAt, payload.ExpiredAt, time.Second)

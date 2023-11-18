@@ -22,16 +22,16 @@ func TestGetAccountByIdAPI(t *testing.T) {
 	account := randomAccount()
 
 	// untuk mendapatkan 100% coverage
-	testCases := []struct{
-		name string
-		accountId int64
-		buildStubs func(store *mockdb.MockMockStore)
-		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder) // check output untuk API 
+	testCases := []struct {
+		name          string
+		accountId     int64
+		buildStubs    func(store *mockdb.MockMockStore)
+		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder) // check output untuk API
 	}{
 		{
-			name: "OK",
+			name:      "OK",
 			accountId: account.ID,
-			buildStubs: func(store *mockdb.MockMockStore){
+			buildStubs: func(store *mockdb.MockMockStore) {
 				// build topik atau stubs untuk mock store
 				// Yaitu get account'
 				// sebanyak 1 kali
@@ -41,7 +41,7 @@ func TestGetAccountByIdAPI(t *testing.T) {
 					Times(1).
 					Return(account, nil)
 			},
-			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder){
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				// check response
 				require.Equal(t, http.StatusOK, recorder.Code)
 
@@ -50,9 +50,9 @@ func TestGetAccountByIdAPI(t *testing.T) {
 			},
 		},
 		{
-			name: "NotFound",
+			name:      "NotFound",
 			accountId: account.ID,
-			buildStubs: func(store *mockdb.MockMockStore){
+			buildStubs: func(store *mockdb.MockMockStore) {
 				// build topik atau stubs untuk mock store
 				// Yaitu get account'
 				// sebanyak 1 kali
@@ -62,15 +62,15 @@ func TestGetAccountByIdAPI(t *testing.T) {
 					Times(1).
 					Return(db.Account{}, sql.ErrNoRows)
 			},
-			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder){
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				// check response
 				require.Equal(t, http.StatusNotFound, recorder.Code)
 			},
 		},
 		{
-			name: "InternalServerError",
+			name:      "InternalServerError",
 			accountId: account.ID,
-			buildStubs: func(store *mockdb.MockMockStore){
+			buildStubs: func(store *mockdb.MockMockStore) {
 				// build topik atau stubs untuk mock store
 				// Yaitu get account'
 				// sebanyak 1 kali
@@ -80,15 +80,15 @@ func TestGetAccountByIdAPI(t *testing.T) {
 					Times(1).
 					Return(db.Account{}, sql.ErrConnDone)
 			},
-			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder){
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				// check response
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
 			},
 		},
 		{
-			name: "BadRequest",
+			name:      "BadRequest",
 			accountId: 0,
-			buildStubs: func(store *mockdb.MockMockStore){
+			buildStubs: func(store *mockdb.MockMockStore) {
 				// build topik atau stubs untuk mock store
 				// Yaitu get account'
 				// sebanyak 1 kali
@@ -97,7 +97,7 @@ func TestGetAccountByIdAPI(t *testing.T) {
 					GetAccount(gomock.Any(), gomock.Any()).
 					Times(0)
 			},
-			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder){
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				// check response
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
 			},
@@ -106,34 +106,35 @@ func TestGetAccountByIdAPI(t *testing.T) {
 
 	for i := range testCases {
 		tc := testCases[i]
-		
+
 		// jalankan
 		t.Run(tc.name, func(t *testing.T) {
 			// deklarasi controller
 			ctrl := gomock.NewController(t)
-		
+
 			// Jika program sudah selesai maka defer ke finsih
 			defer ctrl.Finish()
-		
+
 			// buat store baru
 			store := mockdb.NewMockMockStore(ctrl)
 			tc.buildStubs(store)
 			// test http server dan send getaccount request
 			// digunakan untuk record response
-			server := NewServer(store)
+			// server := NewServer(store)
+			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
 			// deklarasi url path dari API
 			url := fmt.Sprintf("/accounts/%d", tc.accountId)
-		
+
 			// membuat http request
 			request, err := http.NewRequest(http.MethodGet, url, nil)
-		
+
 			// Apabila gagal mengembalikan err
 			require.NoError(t, err)
-		
+
 			server.router.ServeHTTP(recorder, request)
-	
+
 			tc.checkResponse(t, recorder)
 		})
 	}
@@ -141,14 +142,14 @@ func TestGetAccountByIdAPI(t *testing.T) {
 
 func randomAccount() db.Account {
 	return db.Account{
-		ID: util.RandomInt(1, 5000),
-		Owner: util.RandomOwner(),
-		Balance: util.RandomMoney(),
+		ID:       util.RandomInt(1, 5000),
+		Owner:    util.RandomOwner(),
+		Balance:  util.RandomMoney(),
 		Currency: util.RandomCurrency(),
 	}
 }
 
-func requiredBodyMatchAccount(t *testing.T, body *bytes.Buffer, account db.Account){
+func requiredBodyMatchAccount(t *testing.T, body *bytes.Buffer, account db.Account) {
 	// baca semua data response dari body
 	data, err := io.ReadAll(body)
 

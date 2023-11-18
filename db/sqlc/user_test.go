@@ -23,7 +23,7 @@ func createRandomUser(t *testing.T) User {
 	arg := CreateUserParams{
 		Username: util.RandomOwner(),
 		FullName: util.RandomOwner(),
-		Email: util.RandomEmail(),
+		Email:    util.RandomEmail(),
 		Password: hashedPassword,
 	}
 
@@ -54,7 +54,7 @@ func TestCreateUser(t *testing.T) {
 	createRandomUser(t)
 }
 
-func TestGetUser(t *testing.T){
+func TestGetUser(t *testing.T) {
 	// Membuat akun terlebih dahulu
 	user1 := createRandomUser(t)
 

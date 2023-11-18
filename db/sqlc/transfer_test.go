@@ -10,12 +10,12 @@ import (
 )
 
 func createRandomTransfer(t *testing.T, account1, account2 Account) Transfer {
-	
+
 	// Create parameter
 	arg := CreateTransferParams{
-		Amount: util.RandomMoney(),
+		Amount:        util.RandomMoney(),
 		FromAccountID: account1.ID,
-		ToAccountID: account2.ID,
+		ToAccountID:   account2.ID,
 	}
 
 	// Eksekusi create transfer sesuai parameter
@@ -81,14 +81,14 @@ func TestListTransfers(t *testing.T) {
 	// Buat beberapa akun dan juga transfer
 	for i := 0; i < 10; i++ {
 		createRandomTransfer(t, account1, account2)
-	} 
+	}
 
 	// Deklarasi paramter pada list account
 	arg := ListTransfersParams{
-		Limit: 3,
-		Offset: 4,
+		Limit:         3,
+		Offset:        4,
 		FromAccountID: account1.ID,
-		ToAccountID: account2.ID,
+		ToAccountID:   account2.ID,
 	}
 
 	// List Transfer

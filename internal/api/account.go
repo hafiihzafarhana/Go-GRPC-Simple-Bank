@@ -17,7 +17,7 @@ type createAccountRequest struct {
 }
 
 // controller create account
-func (server *Server) createAccount(ctx *gin.Context){
+func (server *Server) createAccount(ctx *gin.Context) {
 	// Deklarasi tipe data
 	var req createAccountRequest
 
@@ -30,9 +30,9 @@ func (server *Server) createAccount(ctx *gin.Context){
 
 	// argumen yang akan dimasukan ke dalam db
 	arg := db.CreateAccountParams{
-		Owner: req.Owner,
+		Owner:    req.Owner,
 		Currency: req.Currency,
-		Balance: 0,
+		Balance:  0,
 	}
 
 	// Masukan data ke dalam db
@@ -61,8 +61,8 @@ type getAccountRequest struct {
 }
 
 // controller get account by id
-func (server *Server) getAccountById(ctx *gin.Context){
-	var req getAccountRequest;
+func (server *Server) getAccountById(ctx *gin.Context) {
+	var req getAccountRequest
 
 	// periksa jika req data tidak sesuai
 	if err := ctx.ShouldBindUri(&req); err != nil {
@@ -98,8 +98,8 @@ type listAccountRequest struct {
 }
 
 // controller get all account
-func (server *Server) listAccounts(ctx *gin.Context){
-	var req listAccountRequest;
+func (server *Server) listAccounts(ctx *gin.Context) {
+	var req listAccountRequest
 
 	// periksa jika req data tidak sesuai
 	if err := ctx.ShouldBindQuery(&req); err != nil {
@@ -110,7 +110,7 @@ func (server *Server) listAccounts(ctx *gin.Context){
 
 	// argumen yang akan dimasukan ke dalam db
 	arg := db.ListAccountsParams{
-		Limit: req.Size,
+		Limit:  req.Size,
 		Offset: (req.Page - 1) * req.Size,
 	}
 

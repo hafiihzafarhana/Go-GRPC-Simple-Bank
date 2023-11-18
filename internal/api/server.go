@@ -1,33 +1,60 @@
 package api
 
 import (
+	"fmt"
+	"log"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 	db "github.com/hafiihzafarhana/Go-GRPC-Simple-Bank/db/sqlc"
+	"github.com/hafiihzafarhana/Go-GRPC-Simple-Bank/util"
+	"github.com/hafiihzafarhana/Go-GRPC-Simple-Bank/util/token"
 )
 
 // struct ini akan melayani permintaan http
 type Server struct {
-	store db.MockStore
-	router *gin.Engine
+	config     util.Config
+	store      db.MockStore
+	router     *gin.Engine
+	tokenMaker token.Maker
 }
 
 // fungsi ini membuat instance server baru dan mengatur route api
-func NewServer(store db.MockStore) *Server {
-	// membuat new server
-	server := &Server{
-		store: store,
+func NewServer(store db.MockStore, config util.Config) (*Server, error) {
+	// inisialisasi token
+	// untuk paseto
+	tokenMaker, err := token.NewPasetoMaker(config.PasetoSymmetricKey)
+
+	// untuk jwt
+	// tokenMaker, err := token.NewJWTMaker(config.PasetoSymmetricKey)
+
+	if err != nil {
+		log.Fatal("token maker fail", err)
+		return nil, fmt.Errorf("token maker fail %w", err)
 	}
 
-	// route
-	router := gin.Default()
+	// membuat new server
+	server := &Server{
+		store:      store,
+		tokenMaker: tokenMaker,
+		config:     config,
+	}
 
 	// untuk mendapatkan engine validator yang digunakan oleh Gin
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		// buat registrasi terhadap validator
 		v.RegisterValidation("currency", validCurrency)
 	}
+
+	server.setupRouter()
+
+	return server, nil
+}
+
+func (server *Server) setupRouter() {
+	// route
+	router := gin.Default()
 
 	// Account
 	// tambah akun
@@ -45,9 +72,12 @@ func NewServer(store db.MockStore) *Server {
 	// tambah data user
 	router.POST("/users", server.createUser)
 
+	// Auth
+	// Login
+	router.POST("/login", server.login)
+
 	// tambah route ke router
 	server.router = router
-	return server
 }
 
 // fungsi untuk menjalankan server

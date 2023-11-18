@@ -10,10 +10,10 @@ import (
 )
 
 func createRandomEntry(t *testing.T, account Account) Entry {
-	
+
 	// Create parameter
 	arg := CreateEntryParams{
-		Amount: util.RandomMoney(),
+		Amount:    util.RandomMoney(),
 		AccountID: account.ID,
 	}
 
@@ -73,12 +73,12 @@ func TestListEntries(t *testing.T) {
 	// Buat beberapa akun dan juga entry
 	for i := 0; i < 10; i++ {
 		createRandomEntry(t, account)
-	} 
+	}
 
 	// Deklarasi paramter pada list account
 	arg := ListEntriesParams{
-		Limit: 2,
-		Offset: 3,
+		Limit:     2,
+		Offset:    3,
 		AccountID: account.ID,
 	}
 

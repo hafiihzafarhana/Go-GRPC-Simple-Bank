@@ -40,4 +40,7 @@ server:
 mockgen:
 	mockgen -package mockdb -destination db/mock/store.go github.com/hafiihzafarhana/Go-GRPC-Simple-Bank/db/sqlc MockStore
 
-.PHONY: postgres createdb dropdb migrateup migratedown migrateup1 migratedown1 startdb stopdb sqlcgen gotidy gotest server mockgen
+goclean:
+	gofmt -w ../.
+
+.PHONY: postgres createdb dropdb migrateup migratedown migrateup1 migratedown1 startdb stopdb sqlcgen gotidy gotest server mockgen goclean

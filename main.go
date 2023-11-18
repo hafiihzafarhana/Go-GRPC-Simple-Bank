@@ -10,7 +10,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func main(){
+func main() {
 	// Ambil fungsi load config dalam util
 	config, err := util.LoadConfig(".")
 
@@ -30,7 +30,11 @@ func main(){
 	store := db.NewStore(conn)
 
 	// ambil server
-	server := api.NewServer(store)
+	server, err := api.NewServer(store, config)
+
+	if err != nil {
+		log.Fatal("Can't create server", err)
+	}
 
 	// pada pengambilan server, maka lanjutkan dengan start
 	err = server.Start(config.ServerAddress)

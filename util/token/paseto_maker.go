@@ -42,8 +42,8 @@ func (maker *PasetoMaker) VerifyToken(token string) (*Payload, error) {
 	err := maker.paseto.Decrypt(token, []byte(maker.symmetricKey), payload, nil)
 
 	if err != nil {
-        return nil, ErrInvalidToken
-    }
+		return nil, ErrInvalidToken
+	}
 
 	// periksa atau validasi payload
 	err = payload.Valid()

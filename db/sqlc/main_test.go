@@ -16,7 +16,7 @@ var testQueries *Queries
 // mendeklarasikan variabel global baru
 var testDB *sql.DB
 
-func TestMain(m *testing.M){
+func TestMain(m *testing.M) {
 	// Ambil fungsi load config dalam util
 	config, err := util.LoadConfig("../../")
 
@@ -26,7 +26,7 @@ func TestMain(m *testing.M){
 
 	// Membuka DB
 	testDB, err = sql.Open(config.DBDriver, config.DBSource)
-	
+
 	// Lakukan pengecheckan apabila ada error
 	if err != nil {
 		log.Fatal("Can't connect to DB ", err)

@@ -38,7 +38,7 @@ func (maker *JWTMaker) VerifyToken(token string) (*Payload, error) {
 	keyfunc := func(t *jwt.Token) (interface{}, error) {
 		// Ini tujuanya agar peretas, pada saat mengganti header alg
 		// token akan menjadi invalid
-		_,ok := t.Method.(*jwt.SigningMethodHMAC)
+		_, ok := t.Method.(*jwt.SigningMethodHMAC)
 
 		if !ok {
 			return nil, ErrInvalidToken
@@ -49,7 +49,7 @@ func (maker *JWTMaker) VerifyToken(token string) (*Payload, error) {
 
 	jwtToken, err := jwt.ParseWithClaims(token, &Payload{}, keyfunc)
 
-	if err != nil{
+	if err != nil {
 		// Karena JWT sebenarnya sudah mengembalikan nilai errornya di file parser.go
 		verr, ok := err.(*jwt.ValidationError)
 
@@ -70,8 +70,8 @@ func (maker *JWTMaker) VerifyToken(token string) (*Payload, error) {
 }
 
 // fungsi yang mengembalikan instance JWTMaker
-/* Dalam Go, sebuah tipe yang mengimplementasikan suatu 
- interface secara otomatis dianggap sebagai instance dari interface tersebut. */
+/* Dalam Go, sebuah tipe yang mengimplementasikan suatu
+interface secara otomatis dianggap sebagai instance dari interface tersebut. */
 func NewJWTMaker(secretKey string) (Maker, error) {
 	// Secret key panjangnya harus sesuai
 	if len(secretKey) < minSecretKeySize {

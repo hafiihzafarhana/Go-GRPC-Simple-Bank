@@ -13,8 +13,8 @@ import (
 func createRandomAccount(t *testing.T) Account {
 	// Create parameter
 	arg := CreateAccountParams{
-		Owner: createRandomUser(t).Username,
-		Balance: util.RandomMoney(),
+		Owner:    createRandomUser(t).Username,
+		Balance:  util.RandomMoney(),
 		Currency: util.RandomCurrency(),
 	}
 
@@ -43,7 +43,7 @@ func TestCreateAccount(t *testing.T) {
 	createRandomAccount(t)
 }
 
-func TestGetAccount(t *testing.T){
+func TestGetAccount(t *testing.T) {
 	// Membuat akun terlebih dahulu
 	account1 := createRandomAccount(t)
 
@@ -70,10 +70,10 @@ func TestUpdateAccount(t *testing.T) {
 
 	// Update Account Params
 	arg := UpdateAccountParams{
-		ID: account1.ID,
+		ID:      account1.ID,
 		Balance: util.RandomMoney(),
 	}
-	
+
 	// Update account
 	account2, err := testQueries.UpdateAccount(context.Background(), arg)
 
@@ -118,11 +118,11 @@ func TestListAccount(t *testing.T) {
 	// Buat beberapa akun
 	for i := 0; i < 10; i++ {
 		createRandomAccount(t)
-	} 
+	}
 
 	// Deklarasi paramter pada list account
 	arg := ListAccountsParams{
-		Limit: 5,
+		Limit:  5,
 		Offset: 5,
 	}
 

@@ -16,7 +16,7 @@ import (
 
 // Fungsi menghasilkan bilangan bulat acak antara min dan max
 func RandomInt(min, max int64) int64 {
-	return min + rand.Int63n(max - min + 1) // Mengembalikan nilai 0 -> max-min
+	return min + rand.Int63n(max-min+1) // Mengembalikan nilai 0 -> max-min
 }
 
 const alphabet = "abcdefghijklmnopqrstuvwxyz"
@@ -29,7 +29,7 @@ func RandomString(n int) string {
 	// Panjang alphabet = 26
 	k := len(alphabet)
 
-	for i:=0; i < n; i++ {
+	for i := 0; i < n; i++ {
 
 		// rand.Intn digunakan untuk mendapatkan posisi acak dari 0 - (k-1)
 		c := alphabet[rand.Intn(k)]
@@ -38,7 +38,7 @@ func RandomString(n int) string {
 		sb.WriteByte(c)
 	}
 
-	return sb.String() 
+	return sb.String()
 }
 
 // Fungsi menghasilkan nama acak pada owner
@@ -55,7 +55,7 @@ func RandomMoney() int64 {
 func RandomCurrency() string {
 	currencies := []string{EUR, USD}
 	n := len(currencies)
-	
+
 	// rand.Intn digunakan untuk mendapatkan posisi acak dari 0 - (n-1)
 	return currencies[rand.Intn(n)]
 }
