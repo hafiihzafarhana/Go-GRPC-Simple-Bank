@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	db "github.com/hafiihzafarhana/Go-GRPC-Simple-Bank/db/sqlc"
+	"github.com/hafiihzafarhana/Go-GRPC-Simple-Bank/exception"
 	"github.com/hafiihzafarhana/Go-GRPC-Simple-Bank/util"
 	"github.com/lib/pq"
 )
@@ -31,14 +32,14 @@ func (server *Server) createUser(ctx *gin.Context) {
 	// periksa jika req data tidak sesuai
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		// Kembalikan response error
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		ctx.JSON(http.StatusBadRequest, exception.ErrorResponse(err))
 		return
 	}
 
 	hashPass, err := util.HashPassword(req.Password)
 
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		ctx.JSON(http.StatusInternalServerError, exception.ErrorResponse(err))
 		return
 	}
 
@@ -59,12 +60,12 @@ func (server *Server) createUser(ctx *gin.Context) {
 			log.Println(pqErr.Code.Name())
 			switch pqErr.Code.Name() {
 			case "unique_violation":
-				ctx.JSON(http.StatusForbidden, errorResponse(err))
+				ctx.JSON(http.StatusForbidden, exception.ErrorResponse(err))
 				return
 			}
 		}
 
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		ctx.JSON(http.StatusInternalServerError, exception.ErrorResponse(err))
 		return
 	}
 

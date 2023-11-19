@@ -9,28 +9,37 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/golang/mock/gomock"
 	mockdb "github.com/hafiihzafarhana/Go-GRPC-Simple-Bank/db/mock"
 	db "github.com/hafiihzafarhana/Go-GRPC-Simple-Bank/db/sqlc"
 	"github.com/hafiihzafarhana/Go-GRPC-Simple-Bank/util"
+	"github.com/hafiihzafarhana/Go-GRPC-Simple-Bank/util/token"
 	"github.com/stretchr/testify/require"
 )
 
 func TestGetAccountByIdAPI(t *testing.T) {
+	// buat user random
+	user, _ := randomUser(t)
+
 	// buat akun
-	account := randomAccount()
+	account := randomAccount(user.Username)
 
 	// untuk mendapatkan 100% coverage
 	testCases := []struct {
 		name          string
 		accountId     int64
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		buildStubs    func(store *mockdb.MockMockStore)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder) // check output untuk API
 	}{
 		{
 			name:      "OK",
 			accountId: account.ID,
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			buildStubs: func(store *mockdb.MockMockStore) {
 				// build topik atau stubs untuk mock store
 				// Yaitu get account'
@@ -50,8 +59,45 @@ func TestGetAccountByIdAPI(t *testing.T) {
 			},
 		},
 		{
+			name:      "UnauthorizedUser",
+			accountId: account.ID,
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, "unauthorized_user", time.Minute)
+			},
+			// build topik atau stubs untuk mock store
+			// Yaitu get account'
+			// sebanyak 1 kali
+			// ekspektasi dari output adalah objek akun dan nil yang berarti tidak error
+			buildStubs: func(store *mockdb.MockMockStore) {
+				store.EXPECT().
+					GetAccount(gomock.Any(), gomock.Eq(account.ID)).
+					Times(1).
+					Return(account, nil)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
+			},
+		},
+		{
+			name:      "NoAuthorization",
+			accountId: account.ID,
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+			},
+			buildStubs: func(store *mockdb.MockMockStore) {
+				store.EXPECT().
+					GetAccount(gomock.Any(), gomock.Any()).
+					Times(0)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
+			},
+		},
+		{
 			name:      "NotFound",
 			accountId: account.ID,
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			buildStubs: func(store *mockdb.MockMockStore) {
 				// build topik atau stubs untuk mock store
 				// Yaitu get account'
@@ -70,6 +116,9 @@ func TestGetAccountByIdAPI(t *testing.T) {
 		{
 			name:      "InternalServerError",
 			accountId: account.ID,
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			buildStubs: func(store *mockdb.MockMockStore) {
 				// build topik atau stubs untuk mock store
 				// Yaitu get account'
@@ -88,6 +137,9 @@ func TestGetAccountByIdAPI(t *testing.T) {
 		{
 			name:      "BadRequest",
 			accountId: 0,
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
+			},
 			buildStubs: func(store *mockdb.MockMockStore) {
 				// build topik atau stubs untuk mock store
 				// Yaitu get account'
@@ -121,7 +173,7 @@ func TestGetAccountByIdAPI(t *testing.T) {
 			// test http server dan send getaccount request
 			// digunakan untuk record response
 			// server := NewServer(store)
-			server := newTestServer(t, store)
+			server := NewTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
 			// deklarasi url path dari API
@@ -133,6 +185,8 @@ func TestGetAccountByIdAPI(t *testing.T) {
 			// Apabila gagal mengembalikan err
 			require.NoError(t, err)
 
+			tc.setupAuth(t, request, server.tokenMaker)
+
 			server.router.ServeHTTP(recorder, request)
 
 			tc.checkResponse(t, recorder)
@@ -140,10 +194,10 @@ func TestGetAccountByIdAPI(t *testing.T) {
 	}
 }
 
-func randomAccount() db.Account {
+func randomAccount(owner string) db.Account {
 	return db.Account{
 		ID:       util.RandomInt(1, 5000),
-		Owner:    util.RandomOwner(),
+		Owner:    owner,
 		Balance:  util.RandomMoney(),
 		Currency: util.RandomCurrency(),
 	}

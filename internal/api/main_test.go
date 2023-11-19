@@ -11,8 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// fungsi untuk
-func newTestServer(t *testing.T, store db.MockStore) *Server {
+func NewTestServer(t *testing.T, store db.MockStore) *Server {
 	config := util.Config{
 		PasetoSymmetricKey:        util.RandomString(32), // alasan 32 karena PasetoSymmetricKey itu 32 byte,
 		PasetoAccessTokenDuration: time.Minute,

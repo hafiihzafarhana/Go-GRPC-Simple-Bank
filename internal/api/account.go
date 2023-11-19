@@ -2,17 +2,19 @@ package api
 
 import (
 	"database/sql"
+	"errors"
 	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	db "github.com/hafiihzafarhana/Go-GRPC-Simple-Bank/db/sqlc"
+	"github.com/hafiihzafarhana/Go-GRPC-Simple-Bank/exception"
+	"github.com/hafiihzafarhana/Go-GRPC-Simple-Bank/util/token"
 	"github.com/lib/pq"
 )
 
 // input untuk create account
 type createAccountRequest struct {
-	Owner    string `json:"owner" binding:"required"`
 	Currency string `json:"currency" binding:"required,currency"`
 }
 
@@ -24,13 +26,16 @@ func (server *Server) createAccount(ctx *gin.Context) {
 	// periksa jika req data tidak sesuai
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		// Kembalikan response error
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		ctx.JSON(http.StatusBadRequest, exception.ErrorResponse(err))
 		return
 	}
 
+	// payload hasil ekstraksi access token
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
 	// argumen yang akan dimasukan ke dalam db
 	arg := db.CreateAccountParams{
-		Owner:    req.Owner,
+		Owner:    authPayload.Username,
 		Currency: req.Currency,
 		Balance:  0,
 	}
@@ -44,12 +49,12 @@ func (server *Server) createAccount(ctx *gin.Context) {
 			log.Println(pqErr.Code.Name())
 			switch pqErr.Code.Name() {
 			case "foreign_key_violation", "unique_violation":
-				ctx.JSON(http.StatusForbidden, errorResponse(err))
+				ctx.JSON(http.StatusForbidden, exception.ErrorResponse(err))
 				return
 			}
 		}
 
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		ctx.JSON(http.StatusInternalServerError, exception.ErrorResponse(err))
 		return
 	}
 
@@ -67,7 +72,7 @@ func (server *Server) getAccountById(ctx *gin.Context) {
 	// periksa jika req data tidak sesuai
 	if err := ctx.ShouldBindUri(&req); err != nil {
 		// Kembalikan response error
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		ctx.JSON(http.StatusBadRequest, exception.ErrorResponse(err))
 		return
 	}
 
@@ -80,12 +85,21 @@ func (server *Server) getAccountById(ctx *gin.Context) {
 	if err != nil {
 		// jika akun tidak ada
 		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			ctx.JSON(http.StatusNotFound, exception.ErrorResponse(err))
 			return
 		}
 
 		// jika ada error pada server
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		ctx.JSON(http.StatusInternalServerError, exception.ErrorResponse(err))
+		return
+	}
+
+	// payload hasil ekstraksi access token
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
+	if account.Owner != authPayload.Username {
+		err := errors.New("account does not belong to authenticated users")
+		ctx.JSON(http.StatusUnauthorized, exception.ErrorResponse(err))
 		return
 	}
 
@@ -104,12 +118,16 @@ func (server *Server) listAccounts(ctx *gin.Context) {
 	// periksa jika req data tidak sesuai
 	if err := ctx.ShouldBindQuery(&req); err != nil {
 		// Kembalikan response error
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		ctx.JSON(http.StatusBadRequest, exception.ErrorResponse(err))
 		return
 	}
 
+	// payload hasil ekstraksi access token
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
 	// argumen yang akan dimasukan ke dalam db
 	arg := db.ListAccountsParams{
+		Owner:  authPayload.Username,
 		Limit:  req.Size,
 		Offset: (req.Page - 1) * req.Size,
 	}
@@ -119,7 +137,7 @@ func (server *Server) listAccounts(ctx *gin.Context) {
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			ctx.JSON(http.StatusNotFound, exception.ErrorResponse(err))
 			return
 		}
 	}

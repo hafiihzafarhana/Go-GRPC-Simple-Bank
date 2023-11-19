@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 	db "github.com/hafiihzafarhana/Go-GRPC-Simple-Bank/db/sqlc"
+	"github.com/hafiihzafarhana/Go-GRPC-Simple-Bank/middleware"
 	"github.com/hafiihzafarhana/Go-GRPC-Simple-Bank/util"
 	"github.com/hafiihzafarhana/Go-GRPC-Simple-Bank/util/token"
 )
@@ -19,6 +20,12 @@ type Server struct {
 	router     *gin.Engine
 	tokenMaker token.Maker
 }
+
+const (
+	authorizationHeaderKey  = "authorization"
+	authorizationTypeBearer = "bearer"
+	authorizationPayloadKey = "authorization_payload"
+)
 
 // fungsi ini membuat instance server baru dan mengatur route api
 func NewServer(store db.MockStore, config util.Config) (*Server, error) {
@@ -56,18 +63,6 @@ func (server *Server) setupRouter() {
 	// route
 	router := gin.Default()
 
-	// Account
-	// tambah akun
-	router.POST("/accounts", server.createAccount)
-	// ambil akun berdasarkan id
-	router.GET("/accounts/:id", server.getAccountById)
-	// ambil akun berdasarkan query
-	router.GET("/accounts", server.listAccounts)
-
-	// Transfer
-	// tambah data transfer
-	router.POST("/transfers", server.createTransfer)
-
 	// User
 	// tambah data user
 	router.POST("/users", server.createUser)
@@ -76,6 +71,21 @@ func (server *Server) setupRouter() {
 	// Login
 	router.POST("/login", server.login)
 
+	// implementasi middleware
+	authRoutes := router.Group("/").Use(middleware.AuthMiddleware(server.tokenMaker))
+
+	// Account
+	// tambah akun
+	authRoutes.POST("/accounts", server.createAccount)
+	// ambil akun berdasarkan id
+	authRoutes.GET("/accounts/:id", server.getAccountById)
+	// ambil akun berdasarkan query
+	authRoutes.GET("/accounts", server.listAccounts)
+
+	// Transfer
+	// tambah data transfer
+	authRoutes.POST("/transfers", server.createTransfer)
+
 	// tambah route ke router
 	server.router = router
 }
@@ -83,9 +93,4 @@ func (server *Server) setupRouter() {
 // fungsi untuk menjalankan server
 func (server *Server) Start(address string) error {
 	return server.router.Run(address)
-}
-
-// fungsi untuk mengirimkan error
-func errorResponse(err error) gin.H {
-	return gin.H{"error": err.Error()}
 }

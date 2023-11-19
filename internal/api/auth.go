@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/hafiihzafarhana/Go-GRPC-Simple-Bank/exception"
 	"github.com/hafiihzafarhana/Go-GRPC-Simple-Bank/util"
 )
 
@@ -27,7 +28,7 @@ func (server *Server) login(ctx *gin.Context) {
 	// periksa jika req data tidak sesuai
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		// Kembalikan response error
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		ctx.JSON(http.StatusBadRequest, exception.ErrorResponse(err))
 		return
 	}
 
@@ -37,12 +38,12 @@ func (server *Server) login(ctx *gin.Context) {
 	if err != nil {
 		// jika user tidak ada
 		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			ctx.JSON(http.StatusNotFound, exception.ErrorResponse(err))
 			return
 		}
 
 		// jika ada error pada server
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		ctx.JSON(http.StatusInternalServerError, exception.ErrorResponse(err))
 		return
 	}
 
@@ -51,7 +52,7 @@ func (server *Server) login(ctx *gin.Context) {
 
 	if err != nil {
 		// jika ada error pada server
-		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		ctx.JSON(http.StatusUnauthorized, exception.ErrorResponse(err))
 		return
 	}
 
@@ -60,7 +61,7 @@ func (server *Server) login(ctx *gin.Context) {
 
 	if err != nil {
 		// jika ada error pada server
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		ctx.JSON(http.StatusInternalServerError, exception.ErrorResponse(err))
 		return
 	}
 
