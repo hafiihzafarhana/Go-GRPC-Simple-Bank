@@ -1,0 +1,29 @@
+version: "3.8"
+services:
+  postgres:
+    image:  postgres:16-alpine
+    environment:  
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB=simple_bank
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  api:
+    build:
+      # ini adalah folder root
+      context:  . 
+      # ambil file Dockerfile
+      dockerfile: Dockerfile 
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_SOURCE=postgresql://root:secret@postgres:5432/simple_bank?sslmode=disable # ini akan menimpa file .env
+    # Ini ditujukan agar service api dijalankan setelah service yang ditentukan telah selesai berjalan
+    # dengan depends_on ini hanya menunggu layanan sudah dimulai, bukan benar-benar siap
+    depends_on:
+      - postgres
+    # jadi nanti "/app/start.sh" dan "/app/main" pada Dockerfile akan ditimpa
+    entrypoint: ["/app/wait-for.sh", "postgres:5432", "--", "/app/start.sh"]
+    command:  ["/app/main"]
+volumes:
+  postgres_data:

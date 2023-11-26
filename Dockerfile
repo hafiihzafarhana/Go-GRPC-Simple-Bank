@@ -14,16 +14,30 @@ COPY . .
 # output bernama main
 # main.go menjadi entry utama
 RUN go build -o main main.go
+# Instalasi curl
+RUN apk add curl
+# jalankan migrasi databasenya
+RUN curl -L https://github.com/golang-migrate/migrate/releases/download/v4.16.2/migrate.linux-amd64.tar.gz | tar xvz
 
 # Stage: Run
 FROM alpine:3.18
 WORKDIR /app
 # hanya copy binernya saja
 COPY --from=builder /app/main .
+# Copy packaga migrasi (/app/migrate merujuk pada package go migrate)
+COPY --from=builder /app/migrate ./migrate
 # Copy .env yang dipunya
 COPY dev.env .
+# COPY start.sh
+COPY start.sh .
+COPY wait-for.sh .
+# Copy db/migration yang berisi file migrasi ke folder migration
+COPY db/migration ./migration
 
 # Container berjalan pada port 8080
 EXPOSE 8080
 # Lakukan command setelah kontainer dimulai
 CMD [ "/app/main" ]
+# Untuk menjalankan start.sh
+# Jadi nanti CMD [ "/app/main" ] akan diteruskan di entrypoint ini
+ENTRYPOINT ["/app/start.sh"]
