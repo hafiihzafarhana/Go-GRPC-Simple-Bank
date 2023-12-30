@@ -1,0 +1,22 @@
+apiVersion: apps/v1 #ketetapan
+kind: Deployment #ketetapan
+metadata:
+  name: simple-bank-api-deployment #nama object
+  labels:
+    app: simple #labelling
+spec:
+  replicas: 2 #akan membuat 2 pod
+  selector:
+    matchLabels:
+      app: simple #disamakan dengan metadata labels simple-bank-api, agar segala bentuk manajemen akan diatas jika memiliki nama label yang match
+  template:
+    metadata:
+      labels:
+        app: simple #begitu pula dengan label yang ini
+    spec:
+      containers:
+      - name: simple
+        image: 848751373893.dkr.ecr.ap-southeast-1.amazonaws.com/simplebank:latest
+        imagePullPolicy: Always # ini digunakan apabila saat berhasil menambah image baru setelah deployment, maka tidak hanya mengambil tag terbaru saja, tetapi kubernetes juga mengambil image terbaru dari ECR
+        ports:
+        - containerPort: 8080
