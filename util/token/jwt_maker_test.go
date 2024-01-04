@@ -23,13 +23,16 @@ func TestJWTMaker(t *testing.T) {
 	expiredAt := issuedAt.Add(duration)
 
 	// Membuat token
-	createToken, err := maker.CreateToken(username, duration)
+	createToken, data, err := maker.CreateToken(username, duration)
 
 	// Apabila gagal, mengembalikan err
 	require.NoError(t, err)
 
 	// token tidak empty
 	require.NotEmpty(t, createToken)
+
+	// payload tidak empty
+	require.NotEmpty(t, data)
 
 	// Verify token
 	payload, err := maker.VerifyToken(createToken)
@@ -59,13 +62,16 @@ func TestExpiredJWTToken(t *testing.T) {
 	username := util.RandomOwner()
 
 	// Membuat token yang expired
-	createToken, err := maker.CreateToken(username, -time.Minute)
+	createToken, data, err := maker.CreateToken(username, -time.Minute)
 
 	// Apabila gagal, mengembalikan err
 	require.NoError(t, err)
 
 	// token tidak empty
 	require.NotEmpty(t, createToken)
+
+	// payload tidak empty
+	require.NotEmpty(t, data)
 
 	// Verify token
 	payload, err := maker.VerifyToken(createToken)

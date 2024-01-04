@@ -3,8 +3,11 @@ package api
 import (
 	"database/sql"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+	db "github.com/hafiihzafarhana/Go-GRPC-Simple-Bank/db/sqlc"
 	"github.com/hafiihzafarhana/Go-GRPC-Simple-Bank/exception"
 	"github.com/hafiihzafarhana/Go-GRPC-Simple-Bank/util"
 )
@@ -17,8 +20,12 @@ type loginUserRequest struct {
 
 // respon setelah berhasil login
 type loginUserResponse struct {
-	AccessToken string             `json:"access_token"`
-	User        createUserResponse `json:"user"`
+	SessionId             uuid.UUID          `json:"session_id"`
+	AccessToken           string             `json:"access_token"`
+	AccessTokenExpiresAt  time.Time          `json:"access_token_expires_at"`
+	RefreshToken          string             `json:"refresh_token"`
+	RefreshTokenExpiresAt time.Time          `json:"refresh_token_expires_at"`
+	User                  createUserResponse `json:"user"`
 }
 
 func (server *Server) login(ctx *gin.Context) {
@@ -56,8 +63,33 @@ func (server *Server) login(ctx *gin.Context) {
 		return
 	}
 
-	// create token
-	token, err := server.tokenMaker.CreateToken(dataUser.Username, server.config.PasetoAccessTokenDuration)
+	// create access token
+	accessToken, accessPayload, err := server.tokenMaker.CreateToken(dataUser.Username, server.config.PasetoAccessTokenDuration)
+
+	if err != nil {
+		// jika ada error pada server
+		ctx.JSON(http.StatusInternalServerError, exception.ErrorResponse(err))
+		return
+	}
+
+	// create refresh token
+	refreshToken, refreshPayload, err := server.tokenMaker.CreateToken(dataUser.Username, server.config.PasetoRefreshTokenDuration)
+
+	if err != nil {
+		// jika ada error pada server
+		ctx.JSON(http.StatusInternalServerError, exception.ErrorResponse(err))
+		return
+	}
+
+	session, err := server.store.CreateSession(ctx, db.CreateSessionParams{
+		ID:           refreshPayload.ID,
+		Username:     dataUser.Username,
+		RefreshToken: refreshToken,
+		UserAgent:    ctx.Request.UserAgent(),
+		ClientIp:     ctx.ClientIP(),
+		IsBlocked:    false,
+		ExpiresAt:    refreshPayload.ExpiredAt,
+	})
 
 	if err != nil {
 		// jika ada error pada server
@@ -66,7 +98,11 @@ func (server *Server) login(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, loginUserResponse{
-		AccessToken: token,
+		SessionId:             session.ID,
+		AccessToken:           accessToken,
+		AccessTokenExpiresAt:  accessPayload.ExpiredAt,
+		RefreshToken:          refreshToken,
+		RefreshTokenExpiresAt: refreshPayload.ExpiredAt,
 		User: createUserResponse{
 			FullName: dataUser.FullName,
 			Username: dataUser.Username,
@@ -74,3 +110,5 @@ func (server *Server) login(ctx *gin.Context) {
 		},
 	})
 }
+
+// func (server *Server) refreshingToken(ctx *gin.Context) {}

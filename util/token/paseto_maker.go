@@ -16,19 +16,20 @@ type PasetoMaker struct {
 }
 
 // CreateToken implements Maker.
-func (maker *PasetoMaker) CreateToken(username string, duration time.Duration) (string, error) {
+func (maker *PasetoMaker) CreateToken(username string, duration time.Duration) (string, *Payload, error) {
 	// Membuat payload
 	payload, err := NewPayload(username, duration)
 
 	if err != nil {
-		return "", err
+		return "", payload, err
 	}
 
 	// membuat enkripsi
 	// argument pertama merupakan key yang digunakan untuk enkripsi atau dekripsi
 	// argument kedua merupakan data yang akan dienkripsi
 	// parameter ke tiga merupakan opsi tambahan, tetapi sekarang ini tidak ada
-	return maker.paseto.Encrypt([]byte(maker.symmetricKey), payload, nil)
+	tokenString, err := maker.paseto.Encrypt([]byte(maker.symmetricKey), payload, nil)
+	return tokenString, payload, err
 }
 
 // VerifyToken implements Maker.

@@ -86,6 +86,10 @@ func (server *Server) setupRouter() {
 	// tambah data transfer
 	authRoutes.POST("/transfers", server.createTransfer)
 
+	// Token
+	// Refresh Token
+	authRoutes.POST("/token/refresh-token", server.renewAccessToken)
+
 	// tambah route ke router
 	server.router = router
 }

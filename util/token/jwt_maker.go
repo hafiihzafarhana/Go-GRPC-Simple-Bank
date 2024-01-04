@@ -16,20 +16,23 @@ type JWTMaker struct {
 }
 
 // CreateToken implements Maker.
-func (maker *JWTMaker) CreateToken(username string, duration time.Duration) (string, error) {
+func (maker *JWTMaker) CreateToken(username string, duration time.Duration) (string, *Payload, error) {
 	// Membuat payload
 	payload, err := NewPayload(username, duration)
 
 	if err != nil {
-		return "", err
+		return "", payload, err
 	}
 
 	// Membuat token baru
 	// var jwt.SigningMethodHS256 *jwt.SigningMethodHMAC
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
 
+	// mendapatkan token dan errornya
+	tokenString, err := jwtToken.SignedString([]byte(maker.secretKey))
+
 	// mengembalikan jwt token dalam bentuk string
-	return jwtToken.SignedString([]byte(maker.secretKey))
+	return tokenString, payload, err
 }
 
 // VerifyToken implements Maker.
