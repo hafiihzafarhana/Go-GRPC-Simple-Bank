@@ -9,11 +9,12 @@ import (
 // konfig semua konfigurasi
 // nilai dibaca oleh viper dengan .env
 type Config struct {
-	DBDriver                  string        `mapstructure:"DB_DRIVER"`
-	DBSource                  string        `mapstructure:"DB_SOURCE"`
-	ServerAddress             string        `mapstructure:"SERVER_ADDRESS"`
-	PasetoSymmetricKey        string        `mapstructure:"PASETO_SYMMETRIC_KEY"`
-	PasetoAccessTokenDuration time.Duration `mapstructure:"PASETO_ACCESS_TOKEN_DURATION"`
+	DBDriver                   string        `mapstructure:"DB_DRIVER"`
+	DBSource                   string        `mapstructure:"DB_SOURCE"`
+	ServerAddress              string        `mapstructure:"SERVER_ADDRESS"`
+	PasetoSymmetricKey         string        `mapstructure:"PASETO_SYMMETRIC_KEY"`
+	PasetoAccessTokenDuration  time.Duration `mapstructure:"PASETO_ACCESS_TOKEN_DURATION"`
+	PasetoRefreshTokenDuration time.Duration `mapstructure:"PASETO_REFRESH_TOKEN_DURATION"`
 }
 
 // fungsi untuk load konfigurasi

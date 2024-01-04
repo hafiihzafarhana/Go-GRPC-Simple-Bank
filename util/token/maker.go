@@ -7,7 +7,7 @@ import (
 // Implementasi interface untuk mengatur token
 type Maker interface {
 	// Method untuk sign token
-	CreateToken(username string, duration time.Duration) (string, error)
+	CreateToken(username string, duration time.Duration) (string, *Payload, error)
 	// Verify token
 	VerifyToken(token string) (*Payload, error)
 }
